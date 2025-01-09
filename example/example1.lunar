@@ -1,0 +1,15 @@
+use pp;
+
+let x = 10;
+
+printLine(fmt"Number is {x}");
+
+let name = "Mani";
+
+print("Hello!\n");
+
+printLine("Welcome!");
+
+print(fmt"Your name is {name}");
+
+exit 0;
