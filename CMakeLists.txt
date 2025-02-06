@@ -3,4 +3,7 @@ project(lrite)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(lrite main.cpp)
+add_executable(lrite src/main.cpp
+        src/generation.hpp
+        src/parser.hpp
+        src/generation.hpp)
