@@ -1,4 +1,6 @@
 cmake-build-debug/
 lrite-build/
 build/
+.idea/
+.vscode/
 
