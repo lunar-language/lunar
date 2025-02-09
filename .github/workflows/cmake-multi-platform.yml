@@ -1,0 +1,92 @@
+name: Publish New Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on version tags like v1.0.0
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt update && sudo apt install -y cmake ninja-build clang
+
+      - name: Install Dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install cmake ninja
+
+      - name: Configure CMake
+        run: cmake -B build -G Ninja
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Determine Architecture
+        id: arch
+        run: echo "ARCH=$(uname -m)" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Package Binary
+        run: |
+          mkdir release
+          cp build/myapp release/
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            tar -czvf stable-complete-linux-${ARCH}.tar.gz -C release myapp
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            tar -czvf stable-complete-macos-${ARCH}.tar.gz -C release myapp
+          fi
+        shell: bash
+
+      - name: Upload Artifact (Linux)
+        uses: actions/upload-artifact@v4
+        with:
+          name: stable-complete-linux-${{ env.ARCH }}
+          path: stable-complete-linux-${{ env.ARCH }}.tar.gz
+        if: runner.os == 'Linux'
+
+      - name: Upload Artifact (macOS)
+        uses: actions/upload-artifact@v4
+        with:
+          name: stable-complete-macos-${{ env.ARCH }}
+          path: stable-complete-macos-${{ env.ARCH }}.tar.gz
+        if: runner.os == 'macOS'
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Linux Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: stable-complete-linux-x86_64
+        continue-on-error: true
+
+      - name: Download macOS Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: stable-complete-macos-arm64
+        continue-on-error: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ github.ref }}
+          name: Release ${{ github.ref_name }}
+          files: |
+            stable-complete-linux-x86_64.tar.gz
+            stable-complete-macos-arm64.tar.gz
+          draft: false
+          prerelease: false
