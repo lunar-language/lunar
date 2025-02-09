@@ -39,7 +39,11 @@ jobs:
         run: cmake -B build -G Ninja
 
       - name: Build
-        run: cmake --build build --config Release
+        run: |
+          cmake -S . -B build/
+          cd build/
+          make
+          cd ..
 
       - name: Determine Architecture
         id: arch
