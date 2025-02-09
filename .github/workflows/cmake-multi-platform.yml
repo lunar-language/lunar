@@ -30,7 +30,7 @@ jobs:
 
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
-        run: brew install cmake ninja
+        run: brew install cmake ninja llvm
 
       - name: Configure CMake
         run: cmake -B build -G Ninja
@@ -46,11 +46,11 @@ jobs:
       - name: Package Binary
         run: |
           mkdir release
-          cp build/myapp release/
+          cp build/lrite release/
           if [[ "$RUNNER_OS" == "Linux" ]]; then
-            tar -czvf stable-complete-linux-${ARCH}.tar.gz -C release myapp
+            tar -czvf stable-complete-linux-${ARCH}.tar.gz -C release lrite
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            tar -czvf stable-complete-macos-${ARCH}.tar.gz -C release myapp
+            tar -czvf stable-complete-macos-${ARCH}.tar.gz -C release lrite
           fi
         shell: bash
 
