@@ -33,6 +33,7 @@ jobs:
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
         run: brew install cmake ninja llvm
+        continue-on-error: true
 
       - name: Configure CMake
         run: cmake -B build -G Ninja
